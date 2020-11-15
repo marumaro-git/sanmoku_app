@@ -10,6 +10,19 @@ export default class Game extends React.Component {
       }],
       xIsNext: true,
       stepNumber: 0,
+      attackList: [
+        {
+          name: '先行',
+          value: true,
+          checked: true
+        },
+        {
+          name: '後攻',
+          value: false,
+          checked: false
+        }
+    ],
+      attack: true
     };
   }
 
@@ -100,6 +113,44 @@ export default class Game extends React.Component {
     });
   }
 
+  generateRadio = () => {
+    let listItems = this.state.attackList.map((list) =>
+        <label key={list.name}>
+          <input
+            type="radio"
+            name={list.name}
+            value={list.value}
+            checked={list.checked}
+            onChange={this.handleCheckChange} />
+            {list.name}
+        </label>);
+    return listItems;
+  }
+
+  handleCheckChange = (e) => {
+    let name  = e.target.name;
+    let state = this.state.attackList;
+    let value = state.map((list)=>{
+      return({
+        name: list.name,
+        value: list.value,
+        checked: (list.name===name)? true:false
+      })
+    });
+    this.setState({attackList: value});
+    this.setState({attack: !this.state.attack});
+  }
+
+  generatebutton = () => {
+    return(
+      <input
+        type="button"
+        name="start"
+        onClick={this.handleCheckChange} />
+        {list.name}
+    );
+  }
+
   render() {
     const history = this.state.history;
     const current = history[history.length - 1];
@@ -112,10 +163,11 @@ export default class Game extends React.Component {
     }
     const moves = history.length < 2 ? null :(
       <button onClick={() => this.jumpTo(0)}>１回前へ戻る</button>
-  );
+    );
 
     return (
       <div className="game">
+        {this.generateRadio()}
         <div className="game-board">
           <Board
             squares={current.squares}
