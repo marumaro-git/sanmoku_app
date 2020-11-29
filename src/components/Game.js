@@ -12,7 +12,7 @@ export default class Game extends React.Component {
       stepNumber: 0,
       attackList: [
         {
-          name: '先行',
+          name: '先攻',
           value: true,
           checked: true
         },
@@ -22,17 +22,20 @@ export default class Game extends React.Component {
           checked: false
         }
     ],
-      attack: true
+      attack: true,
+      start: false
     };
   }
 
   async handleClick(i) {
+    // 下記追記
+    if (!this.state.start) return;
+
     const squares = this.getCurrentBoard();
     if (this.calculateWinner(squares) || squares[i]) {
       return;
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O';
-    // 一部追加
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     let all_history = history.concat([{
       squares: squares
@@ -86,8 +89,7 @@ export default class Game extends React.Component {
   }
 
   // cpu action
-  cpuAction(squares) {
-
+  cpuAction = (squares) => {
     if (this.calculateWinner(squares)) return;
     let history = this.state.history.slice(0, this.state.stepNumber + 1);
 
@@ -141,14 +143,29 @@ export default class Game extends React.Component {
     this.setState({attack: !this.state.attack});
   }
 
+  // スタートボタン
   generatebutton = () => {
     return(
       <input
         type="button"
         name="start"
-        onClick={this.handleCheckChange} />
-        {list.name}
+        value="ゲーム開始"
+        disabled={this.state.start}
+        onClick={this.handleButtonClick} />
     );
+  }
+
+  // ゲーム開始用の関数実行
+  handleButtonClick = () => {
+    this.setState({
+      start: true
+    });
+    // 後攻の場合
+    if(!this.state.attack) {
+      // boardを取得し、CPUのアクションを行う
+      const squares = this.getCurrentBoard();
+      this.cpuAction(squares);
+    }
   }
 
   render() {
@@ -167,7 +184,10 @@ export default class Game extends React.Component {
 
     return (
       <div className="game">
-        {this.generateRadio()}
+        <div className="start">
+          {this.generateRadio()}
+          {this.generatebutton()}
+        </div>
         <div className="game-board">
           <Board
             squares={current.squares}
